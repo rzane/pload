@@ -33,13 +33,7 @@ module Pload
 
   module Base
     def self.prepended(base)
-      base.extend ClassMethods
-    end
-
-    module ClassMethods
-      def pload
-        all.pload
-      end
+      base.singleton_class.delegate :pload, to: :all
     end
 
     def pload?
