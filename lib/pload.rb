@@ -40,12 +40,8 @@ module Pload
       @pload
     end
 
-    def pload(value = true)
-      clone.pload! value
-    end
-
-    def pload!(value = true)
-      @pload = value
+    def pload
+      @pload = true
       self
     end
   end
