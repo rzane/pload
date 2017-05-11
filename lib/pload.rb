@@ -14,15 +14,17 @@ module Pload
     end
 
     def pload!
-      @pload = true
+      @ploading = true
       self
     end
 
-    def pload?
-      @pload
+    def ploading?
+      @ploading
     end
 
-    def each(&block)
+    def each
+      return super unless ploading?
+
       super do |record, *args|
         yield record.pload, *args
       end

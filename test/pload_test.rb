@@ -9,7 +9,11 @@ class PloadTest < Minitest::Spec
     [Post, Author].map(&:delete_all)
   end
 
-  it 'raises for belongs_to' do
+  it 'does not raise for belongs_to when not marked for ploading' do
+    Post.all.each(&:author)
+  end
+
+  it 'raises for belongs_to marked for ploading' do
     error = assert_raises Pload::AssociationNotLoadedError do
       Post.pload.each(&:author)
     end
@@ -19,9 +23,6 @@ class PloadTest < Minitest::Spec
 
   it 'does not raise for belongs_to with includes' do
     Post.pload.includes(:author).each(&:author)
-  end
-
-  it 'does not raise for belongs_to with joins' do
     Post.pload.joins(:author).includes(:author).each(&:author)
   end
 end
