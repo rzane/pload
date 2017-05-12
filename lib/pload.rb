@@ -9,13 +9,13 @@ module Pload
   end
 
   module Relation
-    def pload
-      clone.pload!
+    def pload(*args)
+      spawn.pload!(*args)
     end
 
-    def pload!
+    def pload!(*args)
       @ploading = true
-      self
+      includes!(*args)
     end
 
     def ploading?
