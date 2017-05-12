@@ -1,8 +1,6 @@
 # Pload
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pload`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Pload will prevent Active Record from loading associations that weren't eager loaded.
 
 ## Installation
 
@@ -22,20 +20,45 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Imagine you have 100 posts, and they each have an author. The following would create N+1 query:
 
-## Development
+```ruby
+Post.all.each { |post| puts post.author }
+```
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+This would run 101 queries. On larger applications, it is incredibly easy for these to accidentally slip through the cracks. Wouldn't it be nice if this would throw an error?
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```ruby
+Post.pload.all.each { |post| puts post.author }
+```
+
+Boom! You're going to get an error now. It can be easily solved by using includes:
+
+```ruby
+Post.pload.includes(:author).each { |post| puts post.author }
+
+# or, you can use the shorthand
+Post.pload(:author).each { |post| puts post.author }
+```
+
+Don't want to have to specify `.pload`? Just use `pload` in combination with `default_scope`.
+
+```ruby
+class Post < ActiveRecord::Base
+  default_scope { pload }
+end
+```
+
+And if you want to bypass the error, you can just pass `pload: false` to the association:
+
+```ruby
+Post.pload.all.each { |post| puts post.author(pload: false) }
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/Ray Zane/pload.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/rzane/pload.
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
