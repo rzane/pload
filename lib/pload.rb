@@ -57,15 +57,13 @@ module Pload
 
   module Association
     def reader(pload: true)
-      if pload && owner.pload? && !loaded?
+      return super() unless pload && owner.pload?
+
+      unless loaded?
         raise Pload::AssociationNotLoadedError.new(owner, reflection)
       end
 
-      if pload && owner.pload?
-        super().pload
-      else
-        super()
-      end
+      super().pload
     end
   end
 end
