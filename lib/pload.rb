@@ -13,18 +13,27 @@ module Pload
       spawn.pload!(*args)
     end
 
-    def pload!(*args)
-      @ploading = true
-      includes!(*args)
+    def pload?
+      extending_values.include? PloadedRelation
     end
 
-    def ploading?
-      @ploading
+    def pload!(*args)
+      relation = extending(PloadedRelation)
+      relation = relation.includes(*args) if args.any?
+      relation
+    end
+  end
+
+  module PloadedRelation
+    def first(*)
+      super.pload
+    end
+
+    def last(*)
+      super.pload
     end
 
     def each
-      return super unless ploading?
-
       super do |record, *args|
         yield record.pload, *args
       end
@@ -52,12 +61,16 @@ module Pload
         raise Pload::AssociationNotLoadedError.new(owner, reflection)
       end
 
-      super()
+      if pload && owner.pload?
+        super().pload
+      else
+        super()
+      end
     end
   end
 end
 
 ActiveRecord::Base.prepend Pload::Base
 ActiveRecord::Relation.prepend Pload::Relation
-ActiveRecord::Associations::CollectionAssociation.prepend Pload::Association
 ActiveRecord::Associations::SingularAssociation.prepend Pload::Association
+ActiveRecord::Associations::CollectionAssociation.prepend Pload::Association
