@@ -3,6 +3,7 @@ require 'spec_helper'
 RSpec.describe Pload do
   before do
     Post.create! author: Author.create!
+    Post.create! # null author
   end
 
   after do
@@ -67,8 +68,8 @@ RSpec.describe Pload do
     it 'marks has_many children for pload' do
       Post.pload(author: :posts).each do |post|
         expect(post).to be_pload
-        expect(post.author).to be_pload
-        expect(post.author.posts).to be_pload
+        expect(post.author).to be_pload if post.author
+        expect(post.author.posts).to be_pload if post.author
       end
     end
 

@@ -67,7 +67,7 @@ module Pload
         raise Pload::AssociationNotLoadedError.new(owner, reflection)
       end
 
-      super().pload
+      super().try(:pload)
     end
   end
 end
