@@ -3,13 +3,12 @@ require 'pload/version'
 
 module Pload
   class << self
-    def disable_errors!
-      @enabled = false
+    def silent!
+      @raise = false
     end
 
-    def enabled?
-      return true unless defined?(@enabled)
-      @enabled
+    def raise?
+      @raise != false
     end
   end
 
@@ -21,15 +20,7 @@ module Pload
 
   module Relation
     def pload(*args)
-      spawn.pload!.includes!(*args)
-    end
-
-    def pload!
-      if Pload.enabled?
-        extending! PloadedRelation
-      else
-        self
-      end
+      extending(PloadedRelation).includes!(*args)
     end
 
     def pload?
@@ -59,7 +50,7 @@ module Pload
     end
 
     def pload
-      @pload = Pload.enabled?
+      @pload = true
       self
     end
 
@@ -72,7 +63,7 @@ module Pload
     def reader(pload: true)
       return super() unless pload && owner.pload?
 
-      unless loaded?
+      if !loaded? && Pload.raise?
         raise Pload::AssociationNotLoadedError.new(owner, reflection)
       end
 
