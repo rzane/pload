@@ -2,6 +2,17 @@ require 'active_record'
 require 'pload/version'
 
 module Pload
+  class << self
+    def disable_errors!
+      @enabled = false
+    end
+
+    def enabled?
+      return true unless defined?(@enabled)
+      @enabled
+    end
+  end
+
   class AssociationNotLoadedError < StandardError
     def initialize(owner, reflection)
       super "N+1 query detected:\n  #{owner.class} => :#{reflection.name}"
@@ -10,17 +21,19 @@ module Pload
 
   module Relation
     def pload(*args)
-      spawn.pload!(*args)
+      spawn.pload!.includes!(*args)
+    end
+
+    def pload!
+      if Pload.enabled?
+        extending! PloadedRelation
+      else
+        self
+      end
     end
 
     def pload?
       extending_values.include? PloadedRelation
-    end
-
-    def pload!(*args)
-      relation = extending(PloadedRelation)
-      relation = relation.includes(*args) if args.any?
-      relation
     end
   end
 
@@ -45,13 +58,13 @@ module Pload
       base.singleton_class.delegate :pload, to: :all
     end
 
-    def pload?
-      @pload
+    def pload
+      @pload = Pload.enabled?
+      self
     end
 
-    def pload
-      @pload = true
-      self
+    def pload?
+      @pload
     end
   end
 
