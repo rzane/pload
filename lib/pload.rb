@@ -72,7 +72,9 @@ module Pload
   end
 end
 
-ActiveRecord::Base.prepend Pload::Base
-ActiveRecord::Relation.prepend Pload::Relation
-ActiveRecord::Associations::SingularAssociation.prepend Pload::Association
-ActiveRecord::Associations::CollectionAssociation.prepend Pload::Association
+ActiveSupport.on_load 'active_record' do
+  ActiveRecord::Base.prepend Pload::Base
+  ActiveRecord::Relation.prepend Pload::Relation
+  ActiveRecord::Associations::SingularAssociation.prepend Pload::Association
+  ActiveRecord::Associations::CollectionAssociation.prepend Pload::Association
+end
