@@ -2,7 +2,13 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'pload'
 require 'pry'
 require 'active_record'
+require 'bullet'
 require_relative 'support/schema'
+
+# Test that my monkey-patching plays nicely with theirs!
+Bullet.enable = true
+Bullet.raise = false
+Pload.raise_errors!
 
 ActiveRecord::Base.logger = Logger.new(STDOUT) if ENV['LOG']
 

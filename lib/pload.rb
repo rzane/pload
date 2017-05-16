@@ -3,12 +3,9 @@ require 'pload/version'
 
 module Pload
   class << self
-    def silent!
-      @raise = false
-    end
-
-    def raise?
-      @raise != false
+    def raise_errors!
+      ActiveRecord::Associations::SingularAssociation.prepend Pload::Association
+      ActiveRecord::Associations::CollectionAssociation.prepend Pload::Association
     end
   end
 
@@ -60,21 +57,19 @@ module Pload
   end
 
   module Association
-    def reader(pload: true)
-      return super() unless pload && owner.pload?
+    def reader(*args, pload: true)
+      return super(*args) unless pload && owner.pload?
 
-      if !loaded? && Pload.raise?
+      unless loaded?
         raise Pload::AssociationNotLoadedError.new(owner, reflection)
       end
 
-      super().try(:pload)
+      super(*args).try(:pload)
     end
   end
 end
 
-ActiveSupport.on_load 'active_record' do
+ActiveSupport.on_load :active_record do
   ActiveRecord::Base.prepend Pload::Base
   ActiveRecord::Relation.prepend Pload::Relation
-  ActiveRecord::Associations::SingularAssociation.prepend Pload::Association
-  ActiveRecord::Associations::CollectionAssociation.prepend Pload::Association
 end

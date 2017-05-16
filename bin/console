@@ -3,7 +3,12 @@
 require 'bundler/setup'
 require 'pload'
 require 'pry'
+require 'bullet'
 require_relative '../spec/support/schema'
+
+Bullet.enable = true
+Bullet.raise = false
+Pload.raise_errors!
 
 authors = Array.new(5).map.with_index(1) do |_, i|
   Author.create! name: "Author #{i}"

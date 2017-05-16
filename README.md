@@ -18,6 +18,12 @@ Or install it yourself as:
 
     $ gem install pload
 
+Throw this in an initializer:
+
+```ruby
+Pload.raise_errors!
+```
+
 ## Usage
 
 Imagine you have 100 posts, and they each have an author. The following would create N+1 query:
@@ -54,6 +60,22 @@ And if you want to bypass the error, you can just pass `pload: false` to the ass
 ```ruby
 Post.pload.all.each { |post| puts post.author(pload: false) }
 ```
+
+## Production
+
+Don't want to raise errors in production? Change your initializer to look like this:
+
+```ruby
+Pload.raise_errors! unless Rails.env.production?
+```
+
+The `pload` method will still be available, but it won't raise errors for N+1 queries.
+
+## Bullet compatibility
+
+You can use Pload and Bullet at the same time, but because of the way Bullet monkey-patches Active Record, you'll need to take some precaution.
+
+Make absolutely sure that `Pload.raise_errors!` comes after `Bullet.enable = true`.
 
 ## Contributing
 

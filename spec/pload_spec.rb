@@ -14,26 +14,6 @@ RSpec.describe Pload do
     raise_error(Pload::AssociationNotLoadedError, *args)
   end
 
-  describe '.raise?' do
-    it 'is on by default' do
-      expect(Pload).to be_raise
-    end
-
-    it 'can be disabled' do
-      begin
-        Pload.silent!
-        expect(Pload).not_to be_raise
-      ensure
-        # I don't want to expose a public interface for
-        # re-activating Pload. Disabling isn't thread-safe
-        # and therefore pload should only be disabled at
-        # initialization.
-        Pload.remove_instance_variable(:@raise)
-        expect(Pload).to be_raise
-      end
-    end
-  end
-
   describe 'collection' do
     context 'when marked for ploading' do
       it 'raises when not included' do
