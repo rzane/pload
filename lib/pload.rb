@@ -27,14 +27,20 @@ module Pload
 
   module PloadedRelation
     def first(*)
-      super.pload
+      super.try(:pload)
     end
 
     def last(*)
-      super.pload
+      super.try(:pload)
     end
 
     def each
+      super do |record, *args|
+        yield record.pload, *args
+      end
+    end
+
+    def find_each
       super do |record, *args|
         yield record.pload, *args
       end
